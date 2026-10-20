@@ -1,7 +1,7 @@
 /**
  * @file        example.h
  * @brief       A small library made to try zephyr-installer on: a period that never blocks.
- * @version     1.0.0
+ * @version     1.1.0
  *
  * @author      Nima Askari (NimaLTD)
  * @email       nima.askari@gmail.com
@@ -78,7 +78,13 @@ uint32_t example_count(const example_t *handle);
 
 /*****************************************************************************************************/
 /**
- * @brief Print CONFIG_EXAMPLE_GREETING with printk, and how many periods have passed.
+ * @brief This device's own ID, from the example_id.h the make-id step made, or 0.
+ */
+uint32_t example_id(void);
+
+/*****************************************************************************************************/
+/**
+ * @brief Print CONFIG_EXAMPLE_GREETING with printk, how many periods have passed, and the device ID.
  */
 void example_hello(const example_t *handle);
 

@@ -1,7 +1,7 @@
 /**
  * @file        example.c
  * @brief       A small library made to try zephyr-installer on: a period that never blocks.
- * @version     1.0.0
+ * @version     1.1.0
  *
  * @author      Nima Askari (NimaLTD)
  * @email       nima.askari@gmail.com
@@ -25,6 +25,25 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/__assert.h>
 #include <zephyr/sys/printk.h>
+
+/* The device's own ID, in the example_id.h the make-id step made in the
+   project, when it was run. */
+#if defined(__has_include)
+#if __has_include("example_id.h")
+#include "example_id.h"
+#endif
+#endif
+
+/*
+ * ****************************************************************************************************
+ * Macros
+ * ****************************************************************************************************
+*/
+
+/* 0 when the make-id step was not run, or the compiler cannot look for its file. */
+#ifndef EXAMPLE_DEVICE_ID
+#define EXAMPLE_DEVICE_ID           0UL
+#endif
 
 /*
  * ****************************************************************************************************
@@ -89,7 +108,18 @@ uint32_t example_count(const example_t *handle)
 
 /*****************************************************************************************************/
 /**
- * @brief Print CONFIG_EXAMPLE_GREETING with printk, and how many periods have passed.
+ * @brief This device's own ID, from the example_id.h the make-id step made.
+ *
+ * @return The ID, or 0 when the step was not run.
+ */
+uint32_t example_id(void)
+{
+    return (uint32_t)EXAMPLE_DEVICE_ID;
+}
+
+/*****************************************************************************************************/
+/**
+ * @brief Print CONFIG_EXAMPLE_GREETING with printk, how many periods have passed, and the device ID.
  *
  * @param[in] handle  Period from example_init().
  */
@@ -97,5 +127,6 @@ void example_hello(const example_t *handle)
 {
     __ASSERT_NO_MSG(handle != NULL);
 
-    printk("%s %u\n", CONFIG_EXAMPLE_GREETING, (unsigned int)handle->count);
+    printk("%s %u, device %08X\n", CONFIG_EXAMPLE_GREETING, (unsigned int)handle->count,
+           (unsigned int)example_id());
 }

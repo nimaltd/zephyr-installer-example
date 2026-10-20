@@ -20,10 +20,16 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  zephyr_installer: 1.0.0          # the oldest zephyr-installer that reads this file
+  zephyr_installer: 2.0.0          # the oldest zephyr-installer that reads this file;
+                                   # 2.0.0 for once, run and the cmake groups below
   libraries: []                    # other libraries, installed first when missing:
-                                   #   - osal >= 1.0.0   no owner means nimaltd
-                                   #   - owner/lib       anyone else's
+                                   #   - osal >= 1.0.0       no owner means nimaltd
+                                   #   - owner/lib           anyone else's
+                                   #   - owner/lib@v1.2.0    a tag, branch or commit
+                                   #   - source: owner/other@v2.0.0
+                                   #     manifest: manifests/other.yml
+                                   #                         for a repository with no
+                                   #                         installer.yml of its own
   kconfig:                         # symbols it needs, set in the Kconfig file
     - PRINTK                       # a symbol alone is set to y; SYMBOL=value also works
   peripherals: []                  # hardware it uses, named to the user, such as:
@@ -58,10 +64,36 @@ extras:                            # copied as they are, never compiled
   - NOTICE
   - README.md
 
+once:                              # the application's own files, made when missing and
+                                   # the user's from then on: never replaced or removed
+  - from: project/example.conf     # its settings, added to the build by the conf group
+                                   # below; to: its place, when not its own name
+
+run:                               # steps run once the files are in, each asked first
+  - label: make-id                 # the name typed after --run and --no-run
+    description: Make this device's own ID, example_id.h   # shown with the question
+    script: scripts/make_id.py     # Python, run with the installer's own Python,
+                                   # or command: [program, arguments], with no shell
+    args: [example_id.h]           # given to the script, in the application's folder
+    unless: example_id.h           # skipped when this file is there already
+
 zephyr:                            # read by zephyr-installer only
   kconfig: EXAMPLE                 # the library's symbol; the name in capitals when left out
-  # cmake:                         # lines of CMake added to the module, inside if(CONFIG_X)
-  #   - zephyr_library_compile_options(-O2)
+  cmake:                           # groups of CMake lines, each in a place of its own
+    - label: id                    # names the group, between markers of its own
+      where: module                # the module's CMakeLists.txt, inside if(CONFIG_EXAMPLE)
+      lines:                       # the application's folder, where example_id.h is made
+        - zephyr_library_include_directories(${APPLICATION_SOURCE_DIR})
+    - label: conf
+      where: before-zephyr         # the application's CMakeLists.txt, above find_package
+      lines:
+        - list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
+    # - label: report
+    #   where: after-zephyr        # the application's CMakeLists.txt, at its end
+    #   lines:
+    #     - 'message(STATUS "example is in")'
+  # sysbuild:                      # sysbuild settings, a block in sysbuild.conf
+  #   - BOOTLOADER_MCUBOOT
   settings:                        # Kconfig symbols the user sets, CONFIG_<name> in the code
     - name: EXAMPLE_PERIOD_MS      # the symbol, started with the library's own
       type: int                    # bool, int, hex or string
