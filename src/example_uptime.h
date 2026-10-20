@@ -1,7 +1,7 @@
 /**
  * @file        example_uptime.h
  * @brief       How long the board has been running. The uptime option of the example library.
- * @version     1.1.0
+ * @version     1.2.0
  *
  * @author      Nima Askari (NimaLTD)
  * @email       nima.askari@gmail.com

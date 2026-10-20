@@ -1,7 +1,7 @@
 /**
  * @file        example.h
  * @brief       A small library made to try zephyr-installer on: a period that never blocks.
- * @version     1.1.0
+ * @version     1.2.0
  *
  * @author      Nima Askari (NimaLTD)
  * @email       nima.askari@gmail.com

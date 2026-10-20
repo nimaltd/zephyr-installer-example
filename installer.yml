@@ -2,11 +2,16 @@
 #
 # A library made to try the installer on, and a starting point for your own:
 # copy this file to the root of your library's repository, and change what is
-# yours. Only name and files are required. The keys this library has no use
-# for are here too, commented out, so every one is in one place.
+# yours. Only name and its headers or sources are required. The keys this
+# library has no use for are here too, commented out, so every one is in one
+# place.
 #
 # There is no version here. The installer reads it from the @version tag in
 # the first header listed, so the source files are the only place it is written.
+#
+# Written for 2.1.0: every file keeps the path it has here, src/example.h
+# lands at modules/example/src/example.h, and every path naming a place in
+# the application starts at the application's folder.
 
 name: example                      # the library's name, its folder and its Kconfig symbol
 description: A period that never blocks, made to try zephyr-installer on
@@ -20,8 +25,7 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  zephyr_installer: 2.0.0          # the oldest zephyr-installer that reads this file;
-                                   # 2.0.0 for once, run and the cmake groups below
+  zephyr_installer: 2.1.0          # the oldest zephyr-installer that reads this file
   libraries: []                    # other libraries, installed first when missing:
                                    #   - osal >= 1.0.0       no owner means nimaltd
                                    #   - owner/lib           anyone else's
@@ -30,68 +34,71 @@ requires:
                                    #     manifest: manifests/other.yml
                                    #                         for a repository with no
                                    #                         installer.yml of its own
-  kconfig:                         # symbols it needs, set in the Kconfig file
-    - PRINTK                       # a symbol alone is set to y; SYMBOL=value also works
+  kconfig: []                      # symbols set in the application's Kconfig file, for
+                                   # the user to see, such as:
+                                   #   - I2C               a symbol alone is set to y
+                                   #   - MAIN_STACK_SIZE=2048
   peripherals: []                  # hardware it uses, named to the user, such as:
                                    #   - type: i2c
                                    #     note: 400 kHz
 
-install:
-  layout: mirror                   # mirror keeps the repository's folders, here src/,
-                                   # flat puts every file at the top
-  # include_dirs: [src]            # include folders, only when the guess is wrong
-  # defines:                       # given to the whole build
-  #   - EXAMPLE_FAST               # NAME, or NAME=value
+# install:
+#   include_dirs: [src]            # include folders, only when the guess is wrong
+#   defines:                       # given to the whole build
+#     - EXAMPLE_FAST               # NAME, or NAME=value
 
-files:
-  headers:                         # .h files; the first is the one to #include
-    - src/example.h
-  sources:                         # .c files, built when the library is switched on
-    - src/example.c
+headers:                           # .h files; the first is the one to #include
+  - src/example.h                  # every file keeps its path: modules/example/src/example.h
+sources:                           # .c files, built when the library is switched on
+  - src/example.c
+                                   # a wildcard works too: src/*.c in one folder,
+                                   # src/**/*.c in every folder below src
 
 options:                           # parts the user chooses at install
   uptime:                          # the name typed after --with and --without
     description: Uptime in hours, minutes and seconds   # the question asked
     libraries: []                  # libraries this part needs, installed first
-    files:
-      headers:
-        - src/example_uptime.h
-      sources:
-        - src/example_uptime.c
+    headers:                       # its files, written like headers and sources above
+      - src/example_uptime.h
+    sources:
+      - src/example_uptime.c
 
 extras:                            # copied as they are, never compiled
-  - LICENSE.md
+  - LICENSE.md                     # in the library's folder: modules/example/LICENSE.md
   - NOTICE
   - README.md
+  - root: tools                    # tools/ into the application's folder instead, as the
+                                   # library's own: written again on every install,
+                                   # removed by an uninstall
 
 once:                              # the application's own files, made when missing and
                                    # the user's from then on: never replaced or removed
-  - from: project/example.conf     # its settings, added to the build by the conf group
-                                   # below; to: its place, when not its own name
+  - from: project/example.conf     # its settings, added to the build by the
+    to: example.conf               # before-zephyr lines below. A path alone lands at
+                                   # that path in the application, a to at another
 
 run:                               # steps run once the files are in, each asked first
   - label: make-id                 # the name typed after --run and --no-run
     description: Make this device's own ID, example_id.h   # shown with the question
-    script: scripts/make_id.py     # Python, run with the installer's own Python,
-                                   # or command: [program, arguments], with no shell
+    script: tools/make_id.py       # Python, run with the installer's own Python: the
+                                   # application's tools/make_id.py, which the extra
+                                   # above puts there. {library}/... is one in the library
     args: [example_id.h]           # given to the script, in the application's folder
     unless: example_id.h           # skipped when this file is there already
 
 zephyr:                            # read by zephyr-installer only
   kconfig: EXAMPLE                 # the library's symbol; the name in capitals when left out
-  cmake:                           # groups of CMake lines, each in a place of its own
-    - label: id                    # names the group, between markers of its own
-      where: module                # the module's CMakeLists.txt, inside if(CONFIG_EXAMPLE)
-      lines:                       # the application's folder, where example_id.h is made
-        - zephyr_library_include_directories(${APPLICATION_SOURCE_DIR})
-    - label: conf
-      where: before-zephyr         # the application's CMakeLists.txt, above find_package
-      lines:
-        - list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
-    # - label: report
-    #   where: after-zephyr        # the application's CMakeLists.txt, at its end
-    #   lines:
-    #     - 'message(STATUS "example is in")'
+  defaults:                        # settings of other symbols, held while the library is
+    - PRINTK                       # on, as configdefault in its own Kconfig: a line in
+                                   # prj.conf that sets one wins. SYMBOL=value works too
+  cmake:                           # lines of CMake, under the place they go
+    module:                        # the module's CMakeLists.txt, inside if(CONFIG_EXAMPLE):
+      - zephyr_library_include_directories(${APPLICATION_SOURCE_DIR})
+                                   # the application's folder, where example_id.h is made
+    before-zephyr:                 # the application's CMakeLists.txt, above find_package
+      - list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
+    after-zephyr: []               # the application's CMakeLists.txt, at its end. {library}
+                                   # in a line is the library's folder, wherever it is
   # sysbuild:                      # sysbuild settings, a block in sysbuild.conf
   #   - BOOTLOADER_MCUBOOT
   settings:                        # Kconfig symbols the user sets, CONFIG_<name> in the code
