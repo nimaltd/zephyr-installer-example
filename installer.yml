@@ -1,4 +1,4 @@
-# Read by zephyr-installer. See https://github.com/nimaltd/zephyr-installer
+# Read by lib-installer. See https://github.com/nimaltd/lib-installer
 #
 # A library made to try the installer on, and a starting point for your own:
 # copy this file to the root of your library's repository, and change what is
@@ -9,14 +9,16 @@
 # There is no version here. The installer reads it from the @version tag in
 # the first header listed, so the source files are the only place it is written.
 #
-# Written for 2.1.0: every file keeps the path it has here, src/example.h
+# Written for 3.0.0: every file keeps the path it has here, src/example.h
 # lands at modules/example/src/example.h, and every path naming a place in
 # the application starts at the application's folder.
 
 name: example                      # the library's name, its folder and its Kconfig symbol
-description: A period that never blocks, made to try zephyr-installer on
-repository: https://github.com/nimaltd/zephyr-installer-example
+description: A period that never blocks, made to try lib-installer on
+repository: https://github.com/nimaltd/lib-installer-zephyr
 license: Apache-2.0                # the licence's SPDX name
+platform: zephyr                   # the projects it is for: stm32, zephyr, esp32,
+                                   # arduino and pio, one or a list of them
 
 kind: utility                      # driver, middleware, rtos, protocol, filesystem,
                                    # utility or bsp
@@ -25,7 +27,7 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  zephyr_installer: 2.1.0          # the oldest zephyr-installer that reads this file
+  lib_installer: 3.0.0             # the oldest lib-installer that reads this file
   libraries: []                    # other libraries, installed first when missing:
                                    #   - osal >= 1.0.0       no owner means nimaltd
                                    #   - owner/lib           anyone else's
@@ -86,7 +88,7 @@ run:                               # steps run once the files are in, each asked
     args: [example_id.h]           # given to the script, in the application's folder
     unless: example_id.h           # skipped when this file is there already
 
-zephyr:                            # read by zephyr-installer only
+zephyr:                            # read by lib-installer only
   kconfig: EXAMPLE                 # the library's symbol; the name in capitals when left out
   defaults:                        # settings of other symbols, held while the library is
     - PRINTK                       # on, as configdefault in its own Kconfig: a line in

@@ -1,10 +1,10 @@
-# zephyr-installer-example
+# lib-installer-zephyr
 
-A small library made to try [zephyr-installer](https://github.com/nimaltd/zephyr-installer) on, and a starting point for making your own library installable into a Zephyr or nRF Connect SDK application.
+A small library made to try [lib-installer](https://github.com/nimaltd/lib-installer) on, and a starting point for making your own library installable into a Zephyr or nRF Connect SDK application.
 
 It does one useful thing. `example_due()` says yes once every `CONFIG_EXAMPLE_PERIOD_MS` milliseconds and never blocks, so a loop can blink an LED, read a sensor or print a line on a rhythm without sleeping. `example_hello()` prints `CONFIG_EXAMPLE_GREETING`. Both settings are Kconfig symbols. Its `uptime` option adds `example_uptime()`, the time since start up in hours, minutes and seconds.
 
-It also uses what zephyr-installer 2.0.0 and 2.1.0 bring, so you can see each of them work:
+It also uses what installer.yml gained in 2.0.0 and 2.1.0, so you can see each of them work:
 
 - **A file made once.** Its settings come in `example.conf`, made in your application's folder and yours from then on. No install writes over it.
 - **Lines of CMake by place.** Under `before-zephyr`, a line in your `CMakeLists.txt`, above `find_package(Zephyr)`, adds `example.conf` to the build. Under `module`, one puts your application's folder on the library's include path.
@@ -18,15 +18,15 @@ It also uses what zephyr-installer 2.0.0 and 2.1.0 bring, so you can see each of
 Install the installer once:
 
 ```bash
-pip install zephyr-installer
+pip install lib-installer
 ```
 
-It needs zephyr-installer 2.1.0 or newer. `pip install --upgrade zephyr-installer` brings an older one up to date.
+It needs lib-installer 3.0.0 or newer. `pip install --upgrade lib-installer` brings an older one up to date.
 
 Then, from your application's folder, the one holding `CMakeLists.txt` and `prj.conf`:
 
 ```bash
-zephyr-installer nimaltd/zephyr-installer-example
+lib-installer nimaltd/lib-installer-zephyr
 ```
 
 Press Enter at its questions, and the library goes into `modules/example/` as a Zephyr module, `CMakeLists.txt` gets a block that adds it to the build and one that adds `example.conf`, `prj.conf` gets `CONFIG_EXAMPLE=y`, and `example.conf` is made. Last, it asks about its step:
@@ -98,10 +98,10 @@ Run the install command again, and the file is as you left it: the output says `
 **Look at what it wrote.** The lines of each place sit between two lines naming it, so you can find them, and the next install writes them again:
 
 ```cmake
-# >>> zephyr-installer: example/before-zephyr >>>
+# >>> lib-installer: example/before-zephyr >>>
 # From example's installer.yml, and written again on every install.
 list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
-# <<< zephyr-installer: example/before-zephyr <<<
+# <<< lib-installer: example/before-zephyr <<<
 ```
 
 The module's, `example/module`, are in `modules/example/zephyr/CMakeLists.txt`, and puts your application's folder on the library's include path, which is how `example.c` finds `example_id.h`.
@@ -109,7 +109,7 @@ The module's, `example/module`, are in `modules/example/zephyr/CMakeLists.txt`, 
 **Add a part, and take it out.** `--with uptime` adds `example_uptime.h` and `example_uptime.c` to the module. `--without uptime` takes them out again.
 
 ```bash
-zephyr-installer nimaltd/zephyr-installer-example --with uptime
+lib-installer nimaltd/lib-installer-zephyr --with uptime
 ```
 
 ```c
@@ -119,13 +119,13 @@ example_uptime_t up = example_uptime();   /* up.hours, up.minutes, up.seconds */
 **Uninstall it.** Its blocks leave `CMakeLists.txt` and `prj.conf`, which are back as they were, and its files go, `tools/make_id.py` with them. `example.conf` and `example_id.h` stay, since they are yours, and `example.conf` is no longer in the build. A setting of its you set yourself in `prj.conf` is named, since Zephyr stops on a symbol it no longer knows:
 
 ```bash
-zephyr-installer --uninstall example
+lib-installer --uninstall example
 ```
 
 **Without internet.** Download this repository as a zip, from the green **Code** button, **Download ZIP**, and give the installer the zip instead of the name:
 
 ```bash
-zephyr-installer D:/Downloads/zephyr-installer-example-main.zip
+lib-installer D:/Downloads/lib-installer-zephyr-main.zip
 ```
 
 ---
@@ -137,10 +137,10 @@ Copy [`installer.yml`](installer.yml) to the root of your library's repository, 
 Then anyone installs your library with:
 
 ```bash
-zephyr-installer yourname/yourlibrary
+lib-installer yourname/yourlibrary
 ```
 
-Each entry under `zephyr.settings` becomes a Kconfig symbol the user sets, and your code reads it as `CONFIG_<name>`. `once` lists files for the application's own folder, `run` the steps run after the install, with the script in [`tools/make_id.py`](tools/make_id.py), `zephyr.cmake` the lines of CMake under the place each goes, and `zephyr.defaults` the settings of other symbols. The [zephyr-installer README](https://github.com/nimaltd/zephyr-installer#for-someone-writing-a-library) has the rest.
+Each entry under `zephyr.settings` becomes a Kconfig symbol the user sets, and your code reads it as `CONFIG_<name>`. `once` lists files for the application's own folder, `run` the steps run after the install, with the script in [`tools/make_id.py`](tools/make_id.py), `zephyr.cmake` the lines of CMake under the place each goes, and `zephyr.defaults` the settings of other symbols. The [lib-installer README](https://github.com/nimaltd/lib-installer#for-someone-writing-a-library) has the rest.
 
 ---
 
