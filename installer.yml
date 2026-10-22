@@ -15,7 +15,7 @@
 
 name: example                      # the library's name, its folder and its Kconfig symbol
 description: A period that never blocks, made to try lib-installer on
-repository: https://github.com/nimaltd/lib-installer-zephyr
+repository: https://github.com/nimaltd/lib-installer-example-zephyr
 license: Apache-2.0                # the licence's SPDX name
 platform: zephyr                   # the projects it is for: stm32, zephyr, esp32,
                                    # arduino and pio, one or a list of them

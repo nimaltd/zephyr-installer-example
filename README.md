@@ -1,4 +1,4 @@
-# lib-installer-zephyr
+# lib-installer-example-zephyr
 
 A small library made to try [lib-installer](https://github.com/nimaltd/lib-installer) on, and a starting point for making your own library installable into a Zephyr or nRF Connect SDK application.
 
@@ -26,7 +26,7 @@ It needs lib-installer 3.0.0 or newer. `pip install --upgrade lib-installer` bri
 Then, from your application's folder, the one holding `CMakeLists.txt` and `prj.conf`:
 
 ```bash
-lib-installer nimaltd/lib-installer-zephyr
+lib-installer nimaltd/lib-installer-example-zephyr
 ```
 
 Press Enter at its questions, and the library goes into `modules/example/` as a Zephyr module, `CMakeLists.txt` gets a block that adds it to the build and one that adds `example.conf`, `prj.conf` gets `CONFIG_EXAMPLE=y`, and `example.conf` is made. Last, it asks about its step:
@@ -109,7 +109,7 @@ The module's, `example/module`, are in `modules/example/zephyr/CMakeLists.txt`, 
 **Add a part, and take it out.** `--with uptime` adds `example_uptime.h` and `example_uptime.c` to the module. `--without uptime` takes them out again.
 
 ```bash
-lib-installer nimaltd/lib-installer-zephyr --with uptime
+lib-installer nimaltd/lib-installer-example-zephyr --with uptime
 ```
 
 ```c
@@ -125,7 +125,7 @@ lib-installer --uninstall example
 **Without internet.** Download this repository as a zip, from the green **Code** button, **Download ZIP**, and give the installer the zip instead of the name:
 
 ```bash
-lib-installer D:/Downloads/lib-installer-zephyr-main.zip
+lib-installer D:/Downloads/lib-installer-example-zephyr-main.zip
 ```
 
 ---
