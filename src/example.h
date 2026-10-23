@@ -1,7 +1,7 @@
 /**
  * @file        example.h
  * @brief       A small library made to try lib-installer on: a period that never blocks.
- * @version     1.3.0
+ * @version     1.4.0
  *
  * @author      Nima Askari (NimaLTD)
  * @email       nima.askari@gmail.com

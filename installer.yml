@@ -9,9 +9,12 @@
 # There is no version here. The installer reads it from the @version tag in
 # the first header listed, so the source files are the only place it is written.
 #
-# Written for 3.0.0: every file keeps the path it has here, src/example.h
+# Written for 4.0.0: every file keeps the path it has here, src/example.h
 # lands at modules/example/src/example.h, and every path naming a place in
-# the application starts at the application's folder.
+# the application starts at the application's folder. What the library writes
+# sits under where it goes, zephyr.project for the application's own files and
+# zephyr.library for the library's own folder, and a list can be given in
+# groups under their titles, a setting with a note.
 
 name: example                      # the library's name, its folder and its Kconfig symbol
 description: A period that never blocks, made to try lib-installer on
@@ -27,7 +30,7 @@ category: timing                   # sensor, storage, display, communication, wi
 provides: []                       # what it gives other libraries: [rtos] for an RTOS
 
 requires:
-  lib_installer: 3.0.0             # the oldest lib-installer that reads this file
+  lib_installer: 4.0.0             # the oldest lib-installer that reads this file
   libraries: []                    # other libraries, installed first when missing:
                                    #   - osal >= 1.0.0       no owner means nimaltd
                                    #   - owner/lib           anyone else's
@@ -36,10 +39,6 @@ requires:
                                    #     manifest: manifests/other.yml
                                    #                         for a repository with no
                                    #                         installer.yml of its own
-  kconfig: []                      # symbols set in the application's Kconfig file, for
-                                   # the user to see, such as:
-                                   #   - I2C               a symbol alone is set to y
-                                   #   - MAIN_STACK_SIZE=2048
   peripherals: []                  # hardware it uses, named to the user, such as:
                                    #   - type: i2c
                                    #     note: 400 kHz
@@ -89,20 +88,38 @@ run:                               # steps run once the files are in, each asked
     unless: example_id.h           # skipped when this file is there already
 
 zephyr:                            # read by lib-installer only
-  kconfig: EXAMPLE                 # the library's symbol; the name in capitals when left out
-  defaults:                        # settings of other symbols, held while the library is
-    - PRINTK                       # on, as configdefault in its own Kconfig: a line in
-                                   # prj.conf that sets one wins. SYMBOL=value works too
-  cmake:                           # lines of CMake, under the place they go
-    module:                        # the module's CMakeLists.txt, inside if(CONFIG_EXAMPLE):
-      - zephyr_library_include_directories(${APPLICATION_SOURCE_DIR})
-                                   # the application's folder, where example_id.h is made
-    before-zephyr:                 # the application's CMakeLists.txt, above find_package
-      - list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
-    after-zephyr: []               # the application's CMakeLists.txt, at its end. {library}
-                                   # in a line is the library's folder, wherever it is
-  # sysbuild:                      # sysbuild settings, a block in sysbuild.conf
-  #   - BOOTLOADER_MCUBOOT
+  symbol:                          # the library's switch, CONFIG_EXAMPLE=y, last in its
+    EXAMPLE: builds example, and its defaults hold while it is on
+                                   # block in prj.conf. The name in capitals when left
+                                   # out; symbol: EXAMPLE alone has no note
+  project:                         # written into the application's own files, each in a
+                                   # block of the library's, written again on every install
+    conf: []                       # prj.conf, beside the switch; a line of the user's own
+                                   # wins. A list, or groups under their titles:
+                                   #   Logging:            between two lines of stars
+                                   #     - LOG             a symbol alone is set to y
+                                   #     - LOG_DEFAULT_LEVEL=2: warnings and errors
+                                   #                       a note, a comment above it
+    # sysbuild:                    # sysbuild.conf: sysbuild's settings, without SB_CONFIG_
+    #   - BOOTLOADER_MCUBOOT
+    cmake:                         # its CMakeLists.txt, under the place each line goes
+      before-zephyr:               # above find_package(Zephyr)
+        Your settings in example.conf, read after prj.conf:
+          - list(APPEND EXTRA_CONF_FILE "${CMAKE_CURRENT_SOURCE_DIR}/example.conf")
+                                   # a title over lines of CMake; they take no note
+      after-zephyr: []             # at its end. {library} in a line is the library's
+                                   # folder, wherever it is
+  library:                         # written into the library's own folder, zephyr/
+    kconfig:                       # its Kconfig: settings of other symbols, held while the
+      Printing:                    # library is on, as configdefault; a line in prj.conf
+        - PRINTK: example_hello() prints with printk()   # that sets one wins
+    conf:                          # its Kconfig fragment, zephyr/example.conf, read after
+      A quiet start:               # prj.conf: settings for every build, which win over
+        - BOOT_BANNER=n: the first line printed is example's   # it, and what a default
+                                   # cannot set, such as a member of a choice
+    cmake:                         # its CMakeLists.txt, inside if(CONFIG_EXAMPLE)
+      The application's folder, where example_id.h is made:
+        - zephyr_library_include_directories(${APPLICATION_SOURCE_DIR})
   settings:                        # Kconfig symbols the user sets, CONFIG_<name> in the code
     - name: EXAMPLE_PERIOD_MS      # the symbol, started with the library's own
       type: int                    # bool, int, hex or string
